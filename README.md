@@ -66,6 +66,9 @@ conforme a temperatura aumente (deixar mais avermelhado) ou diminua
 
 - No VSCode, abrir o projeto e instalar a extensão do PlatformIO;
 
+- Abrir o terminal do PLatformIO e configurar a rede Wi-Fi pelo menuconfig com o comando
+```pio run -t menuconfig```
+
 - Na barra inferior, clicar no ícone de build;
 
 - Quando a build terminar, clicar no ícone (->) de upload;
