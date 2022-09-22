@@ -17,6 +17,10 @@
 xSemaphoreHandle conexaoWifiSemaphore;
 xSemaphoreHandle conexaoMQTTSemaphore;
 
+float temperatura = 0.0;
+float umidade     = 0.0;
+float freq_buzzer = 0.0;
+
 void conectadoWifi(void *params)
 {
   while (true)
@@ -29,6 +33,19 @@ void conectadoWifi(void *params)
   }
 }
 
+void trataSensores(){
+  temperatura = get_temperatura_gpio();
+  umidade     = get_umidade_gpio();
+  freq_buzzer = get_frequencia_buzzer();
+
+  //BUZZER
+  atualiza_frequencia_buzzer(temperatura);
+  
+  ESP_LOGI(TAG, "\nTemperatura: %f\nUmidade: %f%%\nFrequencia do buzzer: %.2f", temperatura, umidade, freq_buzzer);
+
+  return;
+}
+
 void trataComunicacaoComServidor(void *params)
 {
   char mensagem[75];
@@ -38,16 +55,10 @@ void trataComunicacaoComServidor(void *params)
     while (true)
     {
       //  float temperatura = 20.0 + (float)rand()/(float)(RAND_MAX/10.0);
-      float temperatura = get_temperatura_gpio();
-      float umidade     = get_umidade_gpio();
-      float freq_buzzer = get_frequencia_buzzer();
+      trataSensores();
 
-      //BUZZER
-      atualiza_frequencia_buzzer(temperatura);
-
-      ESP_LOGI(TAG, "\nTemperatura: %f\nUmidade: %f%%\n", temperatura, umidade);
-
-      sprintf(mensagem, "{\"temperature\": %.2f,\n\"umidade\": %.2f\n\"frequencia_buzzer\": %.2f}", temperatura, umidade, freq_buzzer);
+      sprintf(mensagem, "{\"temperature\": %.2f,\n\"umidade\": %.2f,\n\"frequencia_buzzer\": %.2f}", temperatura, umidade, freq_buzzer);
+      // sprintf(mensagem, "{\"temperature\": %.2f,\n\"umidade\": %.2f}", temperatura, umidade);
       mqtt_envia_mensagem("v1/devices/me/telemetry", mensagem);
 
       sprintf(json, "{\"teste\": 123,\n\"teste2\": 456}");
@@ -56,10 +67,18 @@ void trataComunicacaoComServidor(void *params)
       vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
   }
+  else
+  {
+    while(1)
+    {
+      trataSensores();
+    }
+  }
 }
 
 void app_main(void)
 {
+  printf("Iniciando.............\n");
   // Inicializa o NVS
   esp_err_t ret = nvs_flash_init();
   if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)

@@ -13,6 +13,8 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "gpio.h"
+
 #define WIFI_SSID      CONFIG_ESP_WIFI_SSID
 #define WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
 #define WIFI_MAXIMUM_RETRY  CONFIG_ESP_MAXIMUM_RETRY
@@ -90,6 +92,7 @@ void wifi_start(){
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
                  WIFI_SSID, WIFI_PASS);
+        xTaskCreate(&piscaLed, "Pisca Led Esp32", 4096, NULL, 1, NULL);
     } else if (bits & WIFI_FAIL_BIT) {
         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
                  WIFI_SSID, WIFI_PASS);

@@ -135,13 +135,21 @@ void configura_gpio()
     gpio_set_level(GPIO_LED_PIN, estado_led);
 }
 
-// void troca_gpio_led_estado()
-// {
-//     estado_led = !estado_led;
-//     gpio_set_level(GPIO_LED_PIN, estado_led);
+void piscaLed(){
+    while (1)
+    {
+        troca_gpio_led_estado();
+    }
+}
 
-//     mqtt_envia_estado_botao(estado_led);
-// }
+void troca_gpio_led_estado()
+{
+    estado_led = !estado_led;
+    gpio_set_level(GPIO_LED_PIN, estado_led);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    // mqtt_envia_estado_botao(estado_led);
+}
 
 int get_temperatura_gpio()
 {
